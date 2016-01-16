@@ -1,0 +1,26 @@
+{
+  "uuid": "8e02b5f8-c0fb-480c-a568-47fcaadf97eb",
+  "shortName": "Refuge",
+  "longName": "RefugeRestroom for Pebble",
+  "companyName": "Cat Haines",
+  "versionLabel": "0.1",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "ready": 0
+  },
+  "resources": {
+    "media": [
+      {
+        "file": "images/splash.png",
+        "name": "IMAGE_SPLASH",
+        "storageFormat": "png",
+        "targetPlatforms": ["aplite", "basalt", "chalk"],
+        "type": "bitmap"
+      }
+    ]
+  }
+}
