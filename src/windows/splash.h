@@ -2,12 +2,16 @@
 
 #include "refuge.h"
 
+#define SPLASH_TIMEOUT 5000
+
 typedef struct {
   BaseWindow* base;
   GBitmap* bitmap;
   BitmapLayer* bitmap_layer;
   TextLayer* message_layer;
   char message_text[32];
+
+  AppTimer* timeout_timer;
 } SplashWindow; 
 
 SplashWindow* splash_window_create(char* init_message, int length);

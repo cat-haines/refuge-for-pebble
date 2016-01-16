@@ -7,8 +7,21 @@ static void splash_window_inbox_handler(DictionaryIterator* iter, void* context)
 
   // Handle JSReady event if it is
   if (reply_tuple) {
-    splash_window_set_message((SplashWindow*)context, TXT_CONNECTED, sizeof(TXT_CONNECTED));
+    SplashWindow* window = (SplashWindow*) context;
+    
+    // Cancel the timeout timer if it's set
+    if (window->timeout_timer) {
+      app_timer_cancel(window->timeout_timer);
+      window->timeout_timer = NULL;
+    }
+
+    // Do the rest of the flow...
+    splash_window_set_message(window, TXT_CONNECTED, sizeof(TXT_CONNECTED));
   }
+}
+
+static void splash_window_on_timeout(void* data) {
+  splash_window_set_message((SplashWindow*) data, TXT_NO_CONNECTION, sizeof(TXT_NO_CONNECTION));
 }
 
 static void splash_window_load(Window* window) {
@@ -34,6 +47,8 @@ static void splash_window_load(Window* window) {
   layer_add_child(window_layer, text_layer_get_layer(this->message_layer));
 
   APP_LOG(APP_LOG_LEVEL_INFO, "Created SplashWindow->text_layer");
+
+  this->timeout_timer = app_timer_register(SPLASH_TIMEOUT, splash_window_on_timeout, this);
 }
 
 static void splash_window_unload(Window* window) {
@@ -43,6 +58,8 @@ static void splash_window_unload(Window* window) {
   text_layer_destroy(this->message_layer); this->message_layer = NULL;
   gbitmap_destroy(this->bitmap); this->bitmap = NULL;
   bitmap_layer_destroy(this->bitmap_layer); this->bitmap_layer = NULL;
+
+  if (this->timeout_timer) { app_timer_cancel(this->timeout_timer); this->timeout_timer = NULL; }
 }
 
 SplashWindow* splash_window_create(char* init_message, int n) {
@@ -69,6 +86,7 @@ void splash_window_destroy(SplashWindow* splash) {
   if (splash->bitmap) gbitmap_destroy(splash->bitmap);
   if (splash->bitmap_layer) bitmap_layer_destroy(splash->bitmap_layer);
   if (splash->base) base_window_destroy(splash->base);
+  if (splash->timeout_timer) { app_timer_cancel(splash->timeout_timer); splash->timeout_timer = NULL; }
   if (splash) free(splash);
 
   // Set pointer to NULL (no dangling pointers for us)
