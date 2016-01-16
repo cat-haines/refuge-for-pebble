@@ -1,15 +1,15 @@
 #include "refuge.h"
 
-RefugeWindow* current_window;
+BaseWindow* current_window;
 
 SplashWindow* splash_window;
 
-static void push_window(RefugeWindow* refuge_window) {
-  window_stack_push(refuge_window_get_window(refuge_window), true);
-  app_message_set_context(refuge_window_get_parent(refuge_window));
-  app_message_register_inbox_received(refuge_window_get_inbox_handler(refuge_window));
+static void push_window(BaseWindow* base_window) {
+  window_stack_push(base_window_get_window(base_window), true);
+  app_message_set_context(base_window_get_parent(base_window));
+  app_message_register_inbox_received(base_window_get_inbox_handler(base_window));
   
-  current_window = refuge_window;
+  current_window = base_window;
 }
 
 static void init(void) {

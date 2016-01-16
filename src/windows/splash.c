@@ -47,9 +47,9 @@ static void splash_window_unload(Window* window) {
 
 SplashWindow* splash_window_create(char* init_message, int n) {
   this = malloc(sizeof(SplashWindow));  
-  this->base = refuge_window_create(this, (AppMessageInboxReceived) splash_window_inbox_handler);
+  this->base = base_window_create(this, (AppMessageInboxReceived) splash_window_inbox_handler);
 
-  window_set_window_handlers(refuge_window_get_window(this->base), (WindowHandlers) {
+  window_set_window_handlers(base_window_get_window(this->base), (WindowHandlers) {
     .load = splash_window_load,
     .unload = splash_window_unload
   });
@@ -68,7 +68,7 @@ void splash_window_destroy(SplashWindow* splash) {
   if (splash->message_layer) text_layer_destroy(splash->message_layer);
   if (splash->bitmap) gbitmap_destroy(splash->bitmap);
   if (splash->bitmap_layer) bitmap_layer_destroy(splash->bitmap_layer);
-  if (splash->base) refuge_window_destroy(splash->base);
+  if (splash->base) base_window_destroy(splash->base);
   if (splash) free(splash);
 
   // Set pointer to NULL (no dangling pointers for us)
@@ -97,7 +97,7 @@ void splash_window_clear_message(SplashWindow* splash) {
   splash_window_set_message(splash, "", 0);
 }
 
-RefugeWindow* splash_window_get_base(SplashWindow* splash) {
+BaseWindow* splash_window_get_base(SplashWindow* splash) {
   if (!splash) return NULL;
 
   return splash->base;

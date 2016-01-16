@@ -1,7 +1,7 @@
 #pragma once
 
 #include <pebble.h>
-#include "windows/refuge_window.h"
+#include "windows/base_window.h"
 #include "windows/splash.h"
 #include "windows/menu.h"
 #include "windows/details.h"
