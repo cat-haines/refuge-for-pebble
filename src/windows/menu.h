@@ -3,8 +3,10 @@
 #include "refuge.h"
 
 typedef struct {
-  Window* window;
+  RefugeWindow* base;
 } MenuWindow;
 
 MenuWindow* menu_window_create();
-void menu_window_destroy();
+void menu_window_destroy(MenuWindow* menu_window);
+
+RefugeWindow* menu_window_get_base(MenuWindow* menu_window);

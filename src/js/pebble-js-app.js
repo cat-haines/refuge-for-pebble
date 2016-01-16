@@ -72,13 +72,16 @@ function getRestrooms(onSuccess, onError) {
 }
 
 function onReady(event) {
-  Pebble.sendAppMessage({
-    "ready": 0
-  });
+  // Indicate we're ready to go!
+  Pebble.sendAppMessage({ "appReady": 1 });
 }
 
 function onAppMessage(event) {
-
+  console.log(event)
+  if(event.payload.appReady) {
+    // mirror the appReady message when we receive it
+    Pebble.sendAppMessage({ "appReady": event.payload.appReady });
+  }
 }
 
 Pebble.addEventListener('ready', onReady);
