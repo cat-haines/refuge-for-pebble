@@ -5,6 +5,7 @@
 #include "windows/splash.h"
 #include "windows/menu.h"
 #include "windows/details.h"
+#include "lib/events.h"
 
 // App Messages
 #define INBOX_SIZE 128

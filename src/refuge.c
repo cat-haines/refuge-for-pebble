@@ -1,8 +1,9 @@
 #include "refuge.h"
 
 BaseWindow* current_window;
-
 SplashWindow* splash_window;
+
+EventManager* event_manager;
 
 static void push_window(BaseWindow* base_window) {
   window_stack_push(base_window_get_window(base_window), true);
@@ -13,6 +14,8 @@ static void push_window(BaseWindow* base_window) {
 }
 
 static void init(void) {
+  event_manager = event_manager_create();
+
   app_message_open(INBOX_SIZE, OUTBOX_SIZE);
 
   splash_window = splash_window_create(TXT_INITIALIZING, sizeof(TXT_INITIALIZING));
@@ -21,6 +24,8 @@ static void init(void) {
 
 static void deinit(void) {
   if (splash_window) splash_window_destroy(splash_window);
+
+  event_manager_destroy(event_manager);
 }
 
 int main(void) {
