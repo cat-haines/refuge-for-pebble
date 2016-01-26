@@ -10,7 +10,9 @@
     "watchface": false
   },
   "appKeys": {
-    "appReady": 0
+    "appReady": 0,
+    "washrooms": 1,
+    "getError": 2
   },
   "resources": {
     "media": [
