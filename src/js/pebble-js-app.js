@@ -16,6 +16,7 @@ var RestroomRefuge = function(options) {
 
   // Returns nearby restroom
   this.getRestrooms = function(options, onSuccess, onError) {
+
     // Make sure we have required data
     if (!("lat" in options && "lng" in options)) {
       onError("No location data in search data");
@@ -41,12 +42,15 @@ var RestroomRefuge = function(options) {
         return;
       }
       
+      var data;
       try {
-        var data = JSON.parse(this.responseText)
-        onSuccess(data);
-      } catch (ex) {
+        data = JSON.parse(this.responseText)
+      } 
+      catch (ex) {
         onError(ex);
+        return;
       }
+      onSuccess(data);
     };
     xhr.open("GET", requestUrl);
     xhr.send();
@@ -61,27 +65,30 @@ var refuge = new RestroomRefuge();
 function getRestrooms(onSuccess, onError) {
   navigator.geolocation.getCurrentPosition(function(position) {
     var options = {
-      "lat": pos.coords.latitude,
-      "lng": pos.coords.longitude
+      "lat": position.coords.latitude,
+      "lng": position.coords.longitude
     };
 
     refuge.getRestrooms(options, onSuccess, onError);
   }, function(error) {
-    onError("Error getting currnet position");
+    onError("Error getting current position");
   });
 }
 
 function onReady(event) {
-  // Indicate we're ready to go!
   Pebble.sendAppMessage({ "appReady": 1 });
+
+  // Indicate we're ready to go!
+  getRestrooms(function(data) {
+    // Pebble.sendAppMessage({ "washrooms": data });
+  }, function(err) {
+    console.log("Error: " + err);
+    // Pebble.sendAppMessage({ "getError": 1 });
+  });
 }
 
 function onAppMessage(event) {
-  console.log(event)
-  if(event.payload.appReady) {
-    // mirror the appReady message when we receive it
-    Pebble.sendAppMessage({ "appReady": event.payload.appReady });
-  }
+
 }
 
 Pebble.addEventListener('ready', onReady);

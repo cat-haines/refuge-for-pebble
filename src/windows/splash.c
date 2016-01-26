@@ -1,12 +1,13 @@
 #include "refuge.h"
+#include "splash.h"
 
 static SplashWindow* this;
 
 static void splash_window_inbox_handler(DictionaryIterator* iter, void* context) {
   Tuple *reply_tuple = dict_find(iter, MSG_APP_READY);
 
-  // Handle JSReady event if it is
   if (reply_tuple) {
+    // App Ready Event
     SplashWindow* window = (SplashWindow*) context;
     
     // Cancel the timeout timer if it's set
@@ -14,9 +15,12 @@ static void splash_window_inbox_handler(DictionaryIterator* iter, void* context)
       app_timer_cancel(window->timeout_timer);
       window->timeout_timer = NULL;
     }
-
-    // Do the rest of the flow...
     splash_window_set_message(window, TXT_CONNECTED, sizeof(TXT_CONNECTED));
+    event_manager_raise_event(this->event_manager, APP_READY_EVENT);
+
+  } else if ((reply_tuple = dict_find(iter, MSG_WASHROOMS))) {
+    // Washrooms Data Event
+    event_manager_raise_event(this->event_manager, WASHROOMS_DATA_EVENT);
   }
 }
 
@@ -25,6 +29,8 @@ static void splash_window_on_timeout(void* data) {
 }
 
 static void splash_window_load(Window* window) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Loading SplashWindow->Window");
+
   Layer* window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
@@ -46,8 +52,6 @@ static void splash_window_load(Window* window) {
   text_layer_set_text(this->message_layer, this->message_text);
   layer_add_child(window_layer, text_layer_get_layer(this->message_layer));
 
-  APP_LOG(APP_LOG_LEVEL_INFO, "Created SplashWindow->text_layer");
-
   this->timeout_timer = app_timer_register(SPLASH_TIMEOUT, splash_window_on_timeout, this);
 }
 
@@ -62,9 +66,10 @@ static void splash_window_unload(Window* window) {
   if (this->timeout_timer) { app_timer_cancel(this->timeout_timer); this->timeout_timer = NULL; }
 }
 
-SplashWindow* splash_window_create(char* init_message, int n) {
+SplashWindow* splash_window_create(EventManager* event_manager, char* init_message, int n) {
   this = malloc(sizeof(SplashWindow));  
   this->base = base_window_create(this, (AppMessageInboxReceived) splash_window_inbox_handler);
+  this->event_manager = event_manager;
 
   window_set_window_handlers(base_window_get_window(this->base), (WindowHandlers) {
     .load = splash_window_load,
@@ -86,7 +91,7 @@ void splash_window_destroy(SplashWindow* splash) {
   if (splash->bitmap) gbitmap_destroy(splash->bitmap);
   if (splash->bitmap_layer) bitmap_layer_destroy(splash->bitmap_layer);
   if (splash->base) base_window_destroy(splash->base);
-  if (splash->timeout_timer) { app_timer_cancel(splash->timeout_timer); splash->timeout_timer = NULL; }
+  if (splash->timeout_timer) app_timer_cancel(splash->timeout_timer);
   if (splash) free(splash);
 
   // Set pointer to NULL (no dangling pointers for us)
@@ -95,6 +100,8 @@ void splash_window_destroy(SplashWindow* splash) {
 
 void splash_window_set_message(SplashWindow* splash, char* message, int n) {
   if (!splash) return;
+
+  APP_LOG(APP_LOG_LEVEL_INFO, "SETTING MESSAGE");
 
   if (n > 32) n = 32;
   

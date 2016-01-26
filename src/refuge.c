@@ -2,6 +2,7 @@
 
 BaseWindow* current_window;
 SplashWindow* splash_window;
+MenuWindow* menu_window;
 
 EventManager* event_manager;
 
@@ -13,19 +14,33 @@ static void push_window(BaseWindow* base_window) {
   current_window = base_window;
 }
 
+//******************** Events ********************//
+static void on_app_ready(void* context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "App Ready!");
+}
+
+static void on_washrooms_data(void* context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Washroom Data!!");
+}
+
+//******************** Application Setup ********************//
+
 static void init(void) {
   event_manager = event_manager_create();
-
+  event_manager_subscribe(event_manager, APP_READY_EVENT, on_app_ready);
+  event_manager_subscribe(event_manager, WASHROOMS_DATA_EVENT, on_washrooms_data);
+  
   app_message_open(INBOX_SIZE, OUTBOX_SIZE);
 
-  splash_window = splash_window_create(TXT_INITIALIZING, sizeof(TXT_INITIALIZING));
+  splash_window = splash_window_create(event_manager, TXT_INITIALIZING, sizeof(TXT_INITIALIZING));
   push_window(splash_window_get_base(splash_window));
 }
 
 static void deinit(void) {
-  if (splash_window) splash_window_destroy(splash_window);
-
   event_manager_destroy(event_manager);
+
+  if (splash_window) splash_window_destroy(splash_window);
+  if (menu_window) menu_window_destroy(menu_window);
 }
 
 int main(void) {
