@@ -82,8 +82,7 @@ function onReady(event) {
   getRestrooms(function(data) {
     // Pebble.sendAppMessage({ "washrooms": data });
   }, function(err) {
-    console.log("Error: " + err);
-    // Pebble.sendAppMessage({ "getError": 1 });
+    Pebble.sendAppMessage({ "noLocation": 1 });
   });
 }
 

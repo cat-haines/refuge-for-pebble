@@ -15,8 +15,6 @@ BaseWindow* base_window_create(void* parent, AppMessageInboxReceived inbox_handl
 void base_window_destroy(BaseWindow* base_window) {
   if (!base_window) return;
 
-  APP_LOG(APP_LOG_LEVEL_INFO, "Destroying BaseWindow");
-
   if (base_window->window) window_destroy(base_window->window);
   if (base_window) free(base_window);
 

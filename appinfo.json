@@ -12,7 +12,8 @@
   "appKeys": {
     "appReady": 0,
     "washrooms": 1,
-    "getError": 2
+    "noLocation": 2,
+    "getError": 3
   },
   "resources": {
     "media": [

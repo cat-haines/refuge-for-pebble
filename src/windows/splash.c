@@ -1,14 +1,14 @@
 #include "refuge.h"
 #include "splash.h"
 
-static SplashWindow* this;
-
 static void splash_window_inbox_handler(DictionaryIterator* iter, void* context) {
+  SplashWindow* this = base_window_get_parent(context);
+
   Tuple *reply_tuple = dict_find(iter, MSG_APP_READY);
 
   if (reply_tuple) {
     // App Ready Event
-    SplashWindow* window = (SplashWindow*) context;
+    SplashWindow* window = base_window_get_parent(context);
     
     // Cancel the timeout timer if it's set
     if (window->timeout_timer) {
@@ -16,11 +16,13 @@ static void splash_window_inbox_handler(DictionaryIterator* iter, void* context)
       window->timeout_timer = NULL;
     }
     splash_window_set_message(window, TXT_CONNECTED, sizeof(TXT_CONNECTED));
-    event_manager_raise_event(this->event_manager, APP_READY_EVENT);
+    event_manager_raise_event_with_context(this->event_manager, APP_READY_EVENT, this);
 
+  } else if ((reply_tuple = dict_find(iter, MSG_LOCATION_ERR))) {
+    event_manager_raise_event_with_context(this->event_manager, NO_LOCATION_EVENT, this);
   } else if ((reply_tuple = dict_find(iter, MSG_WASHROOMS))) {
     // Washrooms Data Event
-    event_manager_raise_event(this->event_manager, WASHROOMS_DATA_EVENT);
+    event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this);
   }
 }
 
@@ -28,8 +30,17 @@ static void splash_window_on_timeout(void* data) {
   splash_window_set_message((SplashWindow*) data, TXT_NO_CONNECTION, sizeof(TXT_NO_CONNECTION));
 }
 
+static void splash_window_back_click_handler(ClickRecognizerRef recognizer, void* context) {
+  SplashWindow* this = context;
+  event_manager_raise_event_with_context(this->event_manager, CLOSE_SPLASH_EVENT, this);
+}
+
+static void splash_window_click_config_provider(void* context) {
+  window_single_click_subscribe(BUTTON_ID_BACK, splash_window_back_click_handler);
+}
+
 static void splash_window_load(Window* window) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Loading SplashWindow->Window");
+  SplashWindow* this = base_window_get_parent(window_get_user_data(window));
 
   Layer* window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -56,7 +67,7 @@ static void splash_window_load(Window* window) {
 }
 
 static void splash_window_unload(Window* window) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Unloading SplashWindow->window");
+  SplashWindow* this = base_window_get_parent(window_get_user_data(window));
   
   // Clean up all teh layers and layer information
   text_layer_destroy(this->message_layer); this->message_layer = NULL;
@@ -67,11 +78,16 @@ static void splash_window_unload(Window* window) {
 }
 
 SplashWindow* splash_window_create(EventManager* event_manager, char* init_message, int n) {
-  this = malloc(sizeof(SplashWindow));  
+  SplashWindow* this = malloc(sizeof(SplashWindow));
   this->base = base_window_create(this, (AppMessageInboxReceived) splash_window_inbox_handler);
   this->event_manager = event_manager;
 
-  window_set_window_handlers(base_window_get_window(this->base), (WindowHandlers) {
+  Window* window = base_window_get_window(this->base);
+  window_set_user_data(window, this->base);
+
+  window_set_click_config_provider_with_context(window, splash_window_click_config_provider, this);
+
+  window_set_window_handlers(window, (WindowHandlers) {
     .load = splash_window_load,
     .unload = splash_window_unload
   });
@@ -83,8 +99,6 @@ SplashWindow* splash_window_create(EventManager* event_manager, char* init_messa
 
 void splash_window_destroy(SplashWindow* splash) {
   if (!splash) return;
-
-  APP_LOG(APP_LOG_LEVEL_INFO, "Destroying SplashWindow");
 
   // Clean everything up
   if (splash->message_layer) text_layer_destroy(splash->message_layer);
@@ -101,18 +115,11 @@ void splash_window_destroy(SplashWindow* splash) {
 void splash_window_set_message(SplashWindow* splash, char* message, int n) {
   if (!splash) return;
 
-  APP_LOG(APP_LOG_LEVEL_INFO, "SETTING MESSAGE");
-
   if (n > 32) n = 32;
-  
   strncpy(splash->message_text, message, n);
-  APP_LOG(APP_LOG_LEVEL_INFO, splash->message_text);
 
   if(splash->message_layer) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Redrawing SplashWindow->message_layer");
     text_layer_set_text(splash->message_layer, splash->message_text);
-  } else {
-    APP_LOG(APP_LOG_LEVEL_INFO, "No Layer :(");
   }
 }
 
@@ -127,4 +134,3 @@ BaseWindow* splash_window_get_base(SplashWindow* splash) {
 
   return splash->base;
 }
-
