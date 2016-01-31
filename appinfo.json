@@ -5,6 +5,7 @@
   "companyName": "Cat Haines",
   "versionLabel": "0.1",
   "sdkVersion": "3",
+  "enableMultiJS": true,
   "targetPlatforms": ["aplite", "basalt", "chalk"],
   "watchapp": {
     "watchface": false

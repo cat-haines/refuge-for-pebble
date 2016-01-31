@@ -7,9 +7,6 @@
 
 typedef struct {
   BaseWindow* base;
-  SimpleMenuLayer* menu_layer;
-  SimpleMenuSection menu_sections[NUM_SECTIONS];
-  SimpleMenuItem menu_items[3];
 
   EventManager* event_manager;
 } MenuWindow;

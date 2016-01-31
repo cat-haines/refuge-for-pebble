@@ -3,7 +3,8 @@
 #include "refuge.h"
 #include "../lib/events.h"
 
-#define SPLASH_TIMEOUT 5000
+#define SPLASH_TIMEOUT  5000
+#define MIN_TIME        1000  // Min time to display splash screen
 
 typedef struct {
   BaseWindow* base;
@@ -12,7 +13,12 @@ typedef struct {
   TextLayer* message_layer;
   char message_text[32];
 
+  bool min_time;
+  bool connected;
+  
   EventManager* event_manager;
+
+  AppTimer* min_time_timer;
   AppTimer* timeout_timer;
 } SplashWindow; 
 

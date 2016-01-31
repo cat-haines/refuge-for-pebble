@@ -1,7 +1,7 @@
 #include "refuge.h"
 #include "splash.h"
 
-static void splash_window_inbox_handler(DictionaryIterator* iter, void* context) {
+static void inbox_handler(DictionaryIterator* iter, void* context) {
   SplashWindow* this = base_window_get_parent(context);
 
   Tuple *reply_tuple = dict_find(iter, MSG_APP_READY);
@@ -10,15 +10,24 @@ static void splash_window_inbox_handler(DictionaryIterator* iter, void* context)
     // App Ready Event
     SplashWindow* window = base_window_get_parent(context);
     
+    // Set the connected flag and message
+    this->connected = true;
+    splash_window_set_message(window, TXT_CONNECTED, sizeof(TXT_CONNECTED));
+
     // Cancel the timeout timer if it's set
     if (window->timeout_timer) {
       app_timer_cancel(window->timeout_timer);
       window->timeout_timer = NULL;
     }
-    splash_window_set_message(window, TXT_CONNECTED, sizeof(TXT_CONNECTED));
-    event_manager_raise_event_with_context(this->event_manager, APP_READY_EVENT, this);
 
-  } else if ((reply_tuple = dict_find(iter, MSG_LOCATION_ERR))) {
+    // if the min time has passed, raise the ready event
+    if (this->min_time) {
+      event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this);
+    }
+  } 
+
+
+  else if ((reply_tuple = dict_find(iter, MSG_LOCATION_ERR))) {
     event_manager_raise_event_with_context(this->event_manager, NO_LOCATION_EVENT, this);
   } else if ((reply_tuple = dict_find(iter, MSG_WASHROOMS))) {
     // Washrooms Data Event
@@ -26,20 +35,32 @@ static void splash_window_inbox_handler(DictionaryIterator* iter, void* context)
   }
 }
 
-static void splash_window_on_timeout(void* data) {
+static void on_min_time(void* data) {
+  SplashWindow* this = (SplashWindow*) data;
+  
+  // Set the min time flag
+  this->min_time = true;
+
+  // If we're connected, raise the ready event
+  if (this->connected) {
+    event_manager_raise_event_with_context(this->event_manager, APP_READY_EVENT, this);
+  }
+}
+
+static void on_timeout(void* data) {
   splash_window_set_message((SplashWindow*) data, TXT_NO_CONNECTION, sizeof(TXT_NO_CONNECTION));
 }
 
-static void splash_window_back_click_handler(ClickRecognizerRef recognizer, void* context) {
+static void on_back_click(ClickRecognizerRef recognizer, void* context) {
   SplashWindow* this = context;
   event_manager_raise_event_with_context(this->event_manager, CLOSE_SPLASH_EVENT, this);
 }
 
-static void splash_window_click_config_provider(void* context) {
-  window_single_click_subscribe(BUTTON_ID_BACK, splash_window_back_click_handler);
+static void click_config_provider(void* context) {
+  window_single_click_subscribe(BUTTON_ID_BACK, on_back_click);
 }
 
-static void splash_window_load(Window* window) {
+static void window_load(Window* window) {
   SplashWindow* this = base_window_get_parent(window_get_user_data(window));
 
   Layer* window_layer = window_get_root_layer(window);
@@ -63,10 +84,14 @@ static void splash_window_load(Window* window) {
   text_layer_set_text(this->message_layer, this->message_text);
   layer_add_child(window_layer, text_layer_get_layer(this->message_layer));
 
-  this->timeout_timer = app_timer_register(SPLASH_TIMEOUT, splash_window_on_timeout, this);
+  this->min_time = false;   // set to true after we've displayed for 1 sec
+  this->connected = false;  // set to true after we've received the AppReady message
+  
+  this->min_time_timer = app_timer_register(MIN_TIME, on_min_time, this);
+  this->timeout_timer = app_timer_register(SPLASH_TIMEOUT, on_timeout, this);
 }
 
-static void splash_window_unload(Window* window) {
+static void window_unload(Window* window) {
   SplashWindow* this = base_window_get_parent(window_get_user_data(window));
   
   // Clean up all teh layers and layer information
@@ -79,17 +104,17 @@ static void splash_window_unload(Window* window) {
 
 SplashWindow* splash_window_create(EventManager* event_manager, char* init_message, int n) {
   SplashWindow* this = malloc(sizeof(SplashWindow));
-  this->base = base_window_create(this, (AppMessageInboxReceived) splash_window_inbox_handler);
+  this->base = base_window_create(this, (AppMessageInboxReceived) inbox_handler);
   this->event_manager = event_manager;
 
   Window* window = base_window_get_window(this->base);
   window_set_user_data(window, this->base);
 
-  window_set_click_config_provider_with_context(window, splash_window_click_config_provider, this);
+  window_set_click_config_provider_with_context(window, click_config_provider, this);
 
   window_set_window_handlers(window, (WindowHandlers) {
-    .load = splash_window_load,
-    .unload = splash_window_unload
+    .load = window_load,
+    .unload = window_unload
   });
 
   splash_window_set_message(this, init_message, n);
