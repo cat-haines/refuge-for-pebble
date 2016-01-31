@@ -6,7 +6,7 @@ typedef struct {
   Window* window;
   AppMessageInboxReceived inbox_handler;
   void* parent;
-} BaseWindow; 
+} BaseWindow;
 
 BaseWindow* base_window_create(void* parent, AppMessageInboxReceived inbox_handler);
 void base_window_destroy(BaseWindow* base_window);

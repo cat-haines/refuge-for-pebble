@@ -3,10 +3,11 @@
 #include "refuge.h"
 #include "menu.h"
 
-#define NUM_SECTIONS 1
-
 typedef struct {
   BaseWindow* base;
+  MenuLayer* menu_layer;
+
+  uint16_t num_rows;
 
   EventManager* event_manager;
 } MenuWindow;

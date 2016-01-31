@@ -23,10 +23,9 @@ static void pop_window(bool animated) {
 }
 
 //******************** Events ********************//
-static void on_close_splash(void* context) {
-  if(context == splash_window_get_base(splash_window)) {
-    window_stack_pop_all(false);
-  }
+static void on_app_done(void* context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "on_app_done");
+  window_stack_pop_all(false);
 }
 
 static void on_app_ready(void* context) {
@@ -48,12 +47,12 @@ static void on_washrooms_data(void* context) {
 }
 
 //******************** Application Setup ********************//
-
 static void init(void) {
   event_manager = event_manager_create();
   event_manager_subscribe(event_manager, APP_READY_EVENT, on_app_ready);
   event_manager_subscribe(event_manager, NO_LOCATION_EVENT, on_no_location);
-  event_manager_subscribe(event_manager, CLOSE_SPLASH_EVENT, on_close_splash);
+  event_manager_subscribe(event_manager, SPLASH_BACK_EVENT, on_app_done);
+  event_manager_subscribe(event_manager, MENU_BACK_EVENT, on_app_done);
   event_manager_subscribe(event_manager, WASHROOMS_DATA_EVENT, on_washrooms_data);
   
   app_message_open(INBOX_SIZE, OUTBOX_SIZE);
@@ -65,10 +64,15 @@ static void init(void) {
 }
 
 static void deinit(void) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "deinit");
   event_manager_destroy(event_manager);
 
-  if (splash_window) splash_window_destroy(splash_window);
-  if (menu_window) menu_window_destroy(menu_window);
+  if (splash_window) {
+    splash_window_destroy(splash_window);
+  }
+  if (menu_window) {
+    menu_window_destroy(menu_window);
+  }
 }
 
 int main(void) {

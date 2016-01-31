@@ -19,11 +19,12 @@
 // Text
 #define TXT_INITIALIZING "Initializing..."
 #define TXT_NO_CONNECTION "No Connection :("
-#define TXT_CONNECTED "Connected!"
-#define TXT_NO_LOCATION "Location Services Disabled"
+#define TXT_CONNECTED "Fetching Data..."
+#define TXT_NO_LOCATION "Location Services Disabled :("
 
 // Events
 #define APP_READY_EVENT       0
 #define WASHROOMS_DATA_EVENT  1
 #define NO_LOCATION_EVENT     2
-#define CLOSE_SPLASH_EVENT    3
+#define SPLASH_BACK_EVENT     3
+#define MENU_BACK_EVENT       4

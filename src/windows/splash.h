@@ -11,8 +11,8 @@ typedef struct {
   GBitmap* bitmap;
   BitmapLayer* bitmap_layer;
   TextLayer* message_layer;
-  char message_text[32];
 
+  char message_text[32];
   bool min_time;
   bool connected;
   

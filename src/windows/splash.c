@@ -53,7 +53,7 @@ static void on_timeout(void* data) {
 
 static void on_back_click(ClickRecognizerRef recognizer, void* context) {
   SplashWindow* this = context;
-  event_manager_raise_event_with_context(this->event_manager, CLOSE_SPLASH_EVENT, this->base);
+  event_manager_raise_event_with_context(this->event_manager, SPLASH_BACK_EVENT, this->base);
 }
 
 static void click_config_provider(void* context) {

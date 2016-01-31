@@ -4,6 +4,8 @@
 
 typedef struct {
   BaseWindow* base;
+
+  EventManager* event_manager;
 } DetailsWindow;
 
 DetailsWindow* details_window_create();
