@@ -9,7 +9,7 @@ EventManager* event_manager;
 static void set_current_window(BaseWindow* base_window) {
   app_message_set_context(base_window);
   app_message_register_inbox_received(base_window_get_inbox_handler(base_window));  
-  current_window = base_window_get_parent(base_window);
+  current_window = base_window;
 }
 
 static void push_window(BaseWindow* base_window, bool animated) {
@@ -23,21 +23,23 @@ static void pop_window(bool animated) {
 }
 
 //******************** Events ********************//
+static void on_close_splash(void* context) {
+  if(context == splash_window_get_base(splash_window)) {
+    window_stack_pop_all(false);
+  }
+}
+
 static void on_app_ready(void* context) {
-  if ((void*)current_window == context) {
+  if (context == splash_window_get_base(splash_window)) {
     pop_window(false);
   }
 }
 
 static void on_no_location(void* context) {
-  if ((void*)current_window == context) {
+  if (context == splash_window_get_base(splash_window)) {
     splash_window_set_message(context, TXT_NO_LOCATION, sizeof(TXT_NO_LOCATION));
-  }
-}
-
-static void on_close_splash(void* context) {
-  if((void*)current_window == context) {
-    window_stack_pop_all(false);
+  } else if (context == menu_window_get_base(menu_window)) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "No Location @ menu_window!!");
   }
 }
 

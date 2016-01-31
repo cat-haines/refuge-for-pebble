@@ -22,16 +22,16 @@ static void inbox_handler(DictionaryIterator* iter, void* context) {
 
     // if the min time has passed, raise the ready event
     if (this->min_time) {
-      event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this);
+      event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this->base);
     }
   } 
 
 
   else if ((reply_tuple = dict_find(iter, MSG_LOCATION_ERR))) {
-    event_manager_raise_event_with_context(this->event_manager, NO_LOCATION_EVENT, this);
+    event_manager_raise_event_with_context(this->event_manager, NO_LOCATION_EVENT, this->base);
   } else if ((reply_tuple = dict_find(iter, MSG_WASHROOMS))) {
     // Washrooms Data Event
-    event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this);
+    event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this->base);
   }
 }
 
@@ -43,7 +43,7 @@ static void on_min_time(void* data) {
 
   // If we're connected, raise the ready event
   if (this->connected) {
-    event_manager_raise_event_with_context(this->event_manager, APP_READY_EVENT, this);
+    event_manager_raise_event_with_context(this->event_manager, APP_READY_EVENT, this->base);
   }
 }
 
@@ -53,7 +53,7 @@ static void on_timeout(void* data) {
 
 static void on_back_click(ClickRecognizerRef recognizer, void* context) {
   SplashWindow* this = context;
-  event_manager_raise_event_with_context(this->event_manager, CLOSE_SPLASH_EVENT, this);
+  event_manager_raise_event_with_context(this->event_manager, CLOSE_SPLASH_EVENT, this->base);
 }
 
 static void click_config_provider(void* context) {
