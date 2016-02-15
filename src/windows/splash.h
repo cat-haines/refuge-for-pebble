@@ -15,12 +15,12 @@ typedef struct {
   char message_text[32];
   bool min_time;
   bool connected;
-  
+
   EventManager* event_manager;
 
   AppTimer* min_time_timer;
   AppTimer* timeout_timer;
-} SplashWindow; 
+} SplashWindow;
 
 SplashWindow* splash_window_create(EventManager* event_manager, char* init_message, int length);
 void splash_window_destroy(SplashWindow* splash_window);

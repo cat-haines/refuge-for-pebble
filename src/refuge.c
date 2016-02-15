@@ -7,9 +7,9 @@ MenuWindow* menu_window;
 EventManager* event_manager;
 
 static void set_current_window(BaseWindow* base_window) {
-  app_message_set_context(base_window);
-  app_message_register_inbox_received(base_window_get_inbox_handler(base_window));  
   current_window = base_window;
+  app_message_set_context(base_window);
+  app_message_register_inbox_received(base_window_get_inbox_handler(base_window));
 }
 
 static void push_window(BaseWindow* base_window, bool animated) {
@@ -24,18 +24,25 @@ static void pop_window(bool animated) {
 
 //******************** Events ********************//
 static void on_app_done(void* context) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "on_app_done");
   window_stack_pop_all(false);
 }
 
 static void on_app_ready(void* context) {
-  if (context == splash_window_get_base(splash_window)) {
-    pop_window(false);
+  if (current_window == splash_window_get_base(splash_window)) {
+    // Send appReady msg back to JS
+    DictionaryIterator *iterator;
+    app_message_outbox_begin(&iterator);
+    dict_write_int8(iterator, MSG_APP_READY, 1);
+    app_message_outbox_send();
+
+    // This is a bad thing to do, don't do this...
+    app_message_set_context(menu_window_get_base(menu_window));
+    app_message_register_inbox_received(base_window_get_inbox_handler(menu_window_get_base(menu_window)));
   }
 }
 
 static void on_no_location(void* context) {
-  if (context == splash_window_get_base(splash_window)) {
+  if (current_window == splash_window_get_base(splash_window)) {
     splash_window_set_message(context, TXT_NO_LOCATION, sizeof(TXT_NO_LOCATION));
   } else if (context == menu_window_get_base(menu_window)) {
     APP_LOG(APP_LOG_LEVEL_INFO, "No Location @ menu_window!!");
@@ -43,7 +50,9 @@ static void on_no_location(void* context) {
 }
 
 static void on_washrooms_data(void* context) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Washroom Data!!");
+  if (current_window == splash_window_get_base(splash_window)) {
+    pop_window(false);
+  }
 }
 
 //******************** Application Setup ********************//
@@ -54,7 +63,7 @@ static void init(void) {
   event_manager_subscribe(event_manager, SPLASH_BACK_EVENT, on_app_done);
   event_manager_subscribe(event_manager, MENU_BACK_EVENT, on_app_done);
   event_manager_subscribe(event_manager, WASHROOMS_DATA_EVENT, on_washrooms_data);
-  
+
   app_message_open(INBOX_SIZE, OUTBOX_SIZE);
 
   menu_window = menu_window_create(event_manager);

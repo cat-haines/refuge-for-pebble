@@ -1,9 +1,9 @@
 var RestroomRefuge = function(options) {
   // Defaults
   this.baseUrl = "http://www.refugerestrooms.org/api";
-  this.locationUrl = "/v1/restrooms/by_location.json"
+  this.locationUrl = "/v1/restrooms/by_location.json";
 
-  this.unisex = false
+  this.unisex = false;
   this.ada = false;
 
   // Allow dev to override defaults
@@ -25,12 +25,12 @@ var RestroomRefuge = function(options) {
     // Grab optional parameters, or use defaults
     var unisexSearch = ("unisex" in options) ? options.unisex : this.unisex;
     var adaSearch = ("ada" in options) ? options.ada : this.ada;
-    
+
     // Build the url + query string
-    var requestUrl = this.baseUrl + this.locationUrl+ 
-                     "?lat=" + options.lat + 
+    var requestUrl = this.baseUrl + this.locationUrl+
+                     "?lat=" + options.lat +
                      "&lng=" + options.lng +
-                     "&ada=" + adaSearch + 
+                     "&ada=" + adaSearch +
                      "&unisex=" + unisexSearch;
 
     // Setup our request
@@ -40,11 +40,11 @@ var RestroomRefuge = function(options) {
         onError("Error fetching restrooms (" + this.status + ")");
         return;
       }
-      
+
       var data;
       try {
-        data = JSON.parse(this.responseText)
-      } 
+        data = JSON.parse(this.responseText);
+      }
       catch (ex) {
         onError(ex);
         return;
@@ -54,7 +54,6 @@ var RestroomRefuge = function(options) {
     xhr.open("GET", requestUrl);
     xhr.send();
   };
-
 }
 
 module.exports = RestroomRefuge;

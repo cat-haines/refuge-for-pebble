@@ -14,7 +14,10 @@
     "appReady": 0,
     "washrooms": 1,
     "noLocation": 2,
-    "getError": 3
+    "getError": 3,
+
+    "dataNumPackets": 5,
+    "data": 6
   },
   "resources": {
     "media": [

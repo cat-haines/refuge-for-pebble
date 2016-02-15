@@ -8,13 +8,17 @@
 #include "lib/events.h"
 
 // App Messages
-#define INBOX_SIZE  128
+#define INBOX_SIZE  512
 #define OUTBOX_SIZE 128
 
 #define MSG_APP_READY     0
 #define MSG_WASHROOMS     1
 #define MSG_LOCATION_ERR  2
 #define MSG_GET_ERR       3
+#define MSG_DATA_LENGTH   4
+#define MSG_NUM_PACKETS   5
+#define MSG_DATA          6
+
 
 // Text
 #define TXT_INITIALIZING "Initializing..."

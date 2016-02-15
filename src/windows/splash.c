@@ -2,6 +2,8 @@
 #include "splash.h"
 
 static void inbox_handler(DictionaryIterator* iter, void* context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Splash Handler!");
+
   SplashWindow* this = base_window_get_parent(context);
 
   Tuple *reply_tuple = dict_find(iter, MSG_APP_READY);
@@ -9,7 +11,7 @@ static void inbox_handler(DictionaryIterator* iter, void* context) {
   if (reply_tuple) {
     // App Ready Event
     SplashWindow* window = base_window_get_parent(context);
-    
+
     // Set the connected flag and message
     this->connected = true;
     splash_window_set_message(window, TXT_CONNECTED, sizeof(TXT_CONNECTED));
@@ -24,7 +26,7 @@ static void inbox_handler(DictionaryIterator* iter, void* context) {
     if (this->min_time) {
       event_manager_raise_event_with_context(this->event_manager, WASHROOMS_DATA_EVENT, this->base);
     }
-  } 
+  }
 
 
   else if ((reply_tuple = dict_find(iter, MSG_LOCATION_ERR))) {
@@ -37,7 +39,7 @@ static void inbox_handler(DictionaryIterator* iter, void* context) {
 
 static void on_min_time(void* data) {
   SplashWindow* this = (SplashWindow*) data;
-  
+
   // Set the min time flag
   this->min_time = true;
 
@@ -67,7 +69,7 @@ static void window_load(Window* window) {
   GRect bounds = layer_get_bounds(window_layer);
 
   this->bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SPLASH);
-  
+
   this->bitmap_layer = bitmap_layer_create(bounds);
   bitmap_layer_set_bitmap(this->bitmap_layer, this->bitmap);
   bitmap_layer_set_compositing_mode(this->bitmap_layer, GCompOpSet);
@@ -86,14 +88,14 @@ static void window_load(Window* window) {
 
   this->min_time = false;   // set to true after we've displayed for 1 sec
   this->connected = false;  // set to true after we've received the AppReady message
-  
+
   this->min_time_timer = app_timer_register(MIN_TIME, on_min_time, this);
   this->timeout_timer = app_timer_register(SPLASH_TIMEOUT, on_timeout, this);
 }
 
 static void window_unload(Window* window) {
   SplashWindow* this = base_window_get_parent(window_get_user_data(window));
-  
+
   // Clean up all teh layers and layer information
   text_layer_destroy(this->message_layer); this->message_layer = NULL;
   gbitmap_destroy(this->bitmap); this->bitmap = NULL;
@@ -104,7 +106,7 @@ static void window_unload(Window* window) {
 
 SplashWindow* splash_window_create(EventManager* event_manager, char* init_message, int n) {
   SplashWindow* this = malloc(sizeof(SplashWindow));
-  this->base = base_window_create(this, (AppMessageInboxReceived) inbox_handler);
+  this->base = base_window_create(this, (AppMessageInboxReceived) inbox_handler, 's');
   this->event_manager = event_manager;
 
   Window* window = base_window_get_window(this->base);
@@ -118,7 +120,7 @@ SplashWindow* splash_window_create(EventManager* event_manager, char* init_messa
   });
 
   splash_window_set_message(this, init_message, n);
-  
+
   return this;
 }
 

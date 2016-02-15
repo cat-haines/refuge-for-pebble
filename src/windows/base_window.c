@@ -1,40 +1,43 @@
 #include "refuge.h"
 
-static BaseWindow* this;
+BaseWindow* base_window_create(void* parent, AppMessageInboxReceived inbox_handler, char name) {
+  BaseWindow* this = malloc(sizeof(BaseWindow));
 
-BaseWindow* base_window_create(void* parent, AppMessageInboxReceived inbox_handler) {
-  this = malloc(sizeof(BaseWindow));
-  
   this->window = window_create();
   this->inbox_handler = inbox_handler;
   this->parent = parent;
+  this->name = name;
 
   return this;
 }
 
-void base_window_destroy(BaseWindow* base_window) {
-  if (!base_window) return;
+void base_window_destroy(BaseWindow* this) {
+  if (!this) return;
 
-  if (base_window->window) window_destroy(base_window->window);
-  if (base_window) free(base_window);
+  if (this->window) window_destroy(this->window);
+  if (this) free(this);
 
   // Set pointer to NULL (no dangling pointers for us)
-  base_window = NULL;  
+  this = NULL;
 }
 
-Window* base_window_get_window(BaseWindow* base_window) {
-  if (!base_window) return NULL;
-  if (!base_window->window) return NULL;
+Window* base_window_get_window(BaseWindow* this) {
+  if (!this) return NULL;
+  if (!this->window) return NULL;
 
-  return base_window->window;
+  return this->window;
 }
 
-AppMessageInboxReceived base_window_get_inbox_handler(BaseWindow* base_window) {
-  if (!base_window) return NULL;
-  return base_window->inbox_handler;
+AppMessageInboxReceived base_window_get_inbox_handler(BaseWindow* this) {
+  if (!this) return NULL;
+  return this->inbox_handler;
 }
 
-void* base_window_get_parent(BaseWindow* base_window) {
- if (!base_window) return NULL;
-  return base_window->parent; 
+void* base_window_get_parent(BaseWindow* this) {
+ if (!this) return NULL;
+  return this->parent;
+}
+
+char base_window_get_name(BaseWindow* this) {
+  return this->name;
 }
